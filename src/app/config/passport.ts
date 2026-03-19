@@ -1,8 +1,48 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from "passport";
 import { Strategy as GoogleStrategy, Profile, VerifyCallback } from "passport-google-oauth20";
 import { envVars } from "./env";
 import { User } from "../modules/user/user.model";
 import { Role } from "../modules/user/user.interface";
+import { Strategy as LocalStrategy } from "passport-local";
+import bcryptjs from "bcryptjs";
+
+
+passport.use(
+    new LocalStrategy({
+        usernameField: 'email',
+        passwordField: 'password'
+    }, async (email: string, password: string, done) => {
+        try {
+
+            const isUserExist = await User.findOne({ email });
+
+            if (!isUserExist) {
+                return done(null, false, { message: "User Not Exist" });
+            }
+
+            const isGoogleAuthenticated = isUserExist.auths.some(providerObject => providerObject.provider == 'google');
+
+            if (isGoogleAuthenticated && !isUserExist.password) {
+                return done(null, false, { message: "You have authenticated through Google Login. You may set password for email & password based login." });
+            }
+
+            const isPasswordMatched = await bcryptjs.compare(password as string, isUserExist.password as string);
+
+            if (!isPasswordMatched) {
+                return done(null, false, { message: "Incorrect Password" });
+            }
+
+            return done(null, isUserExist);
+
+        } catch (error) {
+            console.log(error);
+            done(error);
+        }
+    })
+)
+
+
 
 
 
@@ -50,12 +90,10 @@ passport.use(
     )
 )
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 passport.serializeUser((user: any, done: (err: any, id?: unknown) => void) => {
     done(null, user._id);
 })
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 passport.deserializeUser(async (id: string, done: any) => {
     try {
         const user = await User.findById(id);
