@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 export interface ITourType {
-    name: string;
+    tourName: string;
 }
 export interface ITour {
     title: string;

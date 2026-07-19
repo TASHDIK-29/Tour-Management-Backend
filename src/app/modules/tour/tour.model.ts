@@ -2,7 +2,7 @@ import { model, Schema } from "mongoose";
 import { ITour, ITourType } from "./tour.interface";
 
 const tourTypeSchema = new Schema<ITourType>({
-    name: { type: String, required: true, unique: true }
+    tourName: { type: String, required: true, unique: true }
 }, {
     timestamps: true
 })
@@ -40,7 +40,7 @@ const tourSchema = new Schema<ITour>({
     timestamps: true
 })
 
-tourSchema.pre("save", async function (next) {
+tourSchema.pre("save", async function () {
 
     if (this.isModified("title")) {
         const baseSlug = this.title.toLowerCase().split(" ").join("-")
@@ -53,10 +53,10 @@ tourSchema.pre("save", async function (next) {
 
         this.slug = slug;
     }
-    next()
+    // next()
 })
 
-tourSchema.pre("findOneAndUpdate", async function (next) {
+tourSchema.pre("findOneAndUpdate", async function () {
     const tour = this.getUpdate() as Partial<ITour>
 
     if (tour.title) {
@@ -74,7 +74,7 @@ tourSchema.pre("findOneAndUpdate", async function (next) {
 
     this.setUpdate(tour)
 
-    next()
+    // next()
 })
 
 export const Tour = model<ITour>("Tour", tourSchema)

@@ -12,7 +12,7 @@ const divisionSchema = new Schema<IDivision>({
 })
 
 
-divisionSchema.pre("save", async function (next) {
+divisionSchema.pre("save", async function () {
     if (this.isModified("name")) {
         const baseSlug = this.name.toLowerCase().split(" ").join("-")
         let slug = `${baseSlug}-division`
@@ -24,10 +24,10 @@ divisionSchema.pre("save", async function (next) {
 
         this.slug = slug;
     }
-    next()
+    // next()
 })
 
-divisionSchema.pre("findOneAndUpdate", async function (next) {
+divisionSchema.pre("findOneAndUpdate", async function () {
     const division = this.getUpdate() as Partial<IDivision>
 
     if (division.name) {
@@ -44,7 +44,7 @@ divisionSchema.pre("findOneAndUpdate", async function (next) {
 
     this.setUpdate(division)
 
-    next()
+    // next()
 })
 
 export const Division = model<IDivision>("Division", divisionSchema)
