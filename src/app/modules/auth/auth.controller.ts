@@ -6,7 +6,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status-codes";
 import { AuthServices } from "./auth.service";
 import AppError from "../../error/AppError";
-import { setAuthCookie } from "../../utils/setCookie";
+import { clearAuthCookie, setAuthCookie } from "../../utils/setCookie";
 import { JwtPayload } from "jsonwebtoken";
 import { createUserTokens } from "../../utils/userTokens";
 import { envVars } from "../../config/env";
@@ -75,17 +75,9 @@ const getNewAccessToken = catchAsync(async (req: Request, res: Response, next: N
 })
 
 const logout = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    res.clearCookie('accessToken', {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax"
-    })
-
-    res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax"
-    })
+    // Clearing only works when the attributes match the ones used to set the
+    // cookie, so both paths share authCookieOptions via these helpers.
+    clearAuthCookie(res)
 
     sendResponse(res, {
         success: true,

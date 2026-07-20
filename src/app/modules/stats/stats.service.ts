@@ -6,9 +6,16 @@ import { Tour } from "../tour/tour.model";
 import { IsActive } from "../user/user.interface";
 import { User } from "../user/user.model";
 
-const now = new Date();
-const sevenDaysAgo = new Date(now).setDate(now.getDate() - 7);
-const thirtyDaysAgo = new Date(now).setDate(now.getDate() - 30);
+/**
+ * Computed per call, NOT at module load. As module-level consts these were
+ * frozen at server boot, so "last 7 days" silently drifted further into the
+ * past for as long as the process stayed up.
+ */
+const daysAgo = (days: number) => {
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+    return date;
+};
 
 const getUserStats = async () => {
     const totalUsersPromise = User.countDocuments()
@@ -18,10 +25,10 @@ const getUserStats = async () => {
     const totalBlockedUsersPromise = User.countDocuments({ isActive: IsActive.BLOCKED })
 
     const newUsersInLast7DaysPromise = User.countDocuments({
-        createdAt: { $gte: sevenDaysAgo }
+        createdAt: { $gte: daysAgo(7) }
     })
     const newUsersInLast30DaysPromise = User.countDocuments({
-        createdAt: { $gte: thirtyDaysAgo }
+        createdAt: { $gte: daysAgo(30) }
     })
 
     const usersByRolePromise = User.aggregate([
@@ -77,8 +84,10 @@ const getTourStats = async () => {
 
         //stage - 3 : grouping tour type
         {
+            // The TourType model field is `tourName`, not `name` — grouping on
+            // `$type.name` bucketed EVERY tour under a single `_id: null`.
             $group: {
-                _id: "$type.name",
+                _id: "$type.tourName",
                 count: { $sum: 1 }
             }
         }
@@ -256,14 +265,18 @@ const getBookingStats = async () => {
     ])
 
     const bookingsLast7DaysPromise = Booking.countDocuments({
-        createdAt: { $gte: sevenDaysAgo }
+        createdAt: { $gte: daysAgo(7) }
     })
     const bookingsLast30DaysPromise = Booking.countDocuments({
-        createdAt: { $gte: thirtyDaysAgo }
+        createdAt: { $gte: daysAgo(30) }
     })
 
     const totalBookingByUniqueUsersPromise = Booking.distinct("user").then((user: any) => user.length)
 
+    // NOTE: this array previously held EIGHT promises against SEVEN names, with
+    // `totalBookingByStatusPromise` repeated in slot 7 — so
+    // `totalBookingByUniqueUsers` received the status aggregate array instead of
+    // a count, and the real unique-user promise fell off the end.
     const [totalBooking, totalBookingByStatus, bookingsPerTour, avgGuestCountPerBooking, bookingsLast7Days, bookingsLast30Days, totalBookingByUniqueUsers] = await Promise.all([
         totalBookingPromise,
         totalBookingByStatusPromise,
@@ -271,11 +284,20 @@ const getBookingStats = async () => {
         avgGuestCountPerBookingPromise,
         bookingsLast7DaysPromise,
         bookingsLast30DaysPromise,
-        totalBookingByStatusPromise,
         totalBookingByUniqueUsersPromise
     ])
 
-    return { totalBooking, totalBookingByStatus, bookingsPerTour, avgGuestCountPerBooking: avgGuestCountPerBooking[0].avgGuestCount, bookingsLast7Days, bookingsLast30Days, totalBookingByUniqueUsers }
+    return {
+        totalBooking,
+        totalBookingByStatus,
+        bookingsPerTour,
+        // `[0]` is undefined when no bookings exist — an empty $group returns [],
+        // and reading `.avgGuestCount` off it threw a 500.
+        avgGuestCountPerBooking: avgGuestCountPerBooking[0]?.avgGuestCount ?? 0,
+        bookingsLast7Days,
+        bookingsLast30Days,
+        totalBookingByUniqueUsers
+    }
 }
 
 const getPaymentStats = async () => {

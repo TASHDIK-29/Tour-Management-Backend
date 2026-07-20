@@ -21,7 +21,14 @@ const initPayment = async (bookingId: string) => {
         throw new AppError(httpStatus.NOT_FOUND, "Payment Not Found. You have not booked this tour")
     }
 
+    // Must populate: `booking.user` is an ObjectId otherwise, so every cus_*
+    // field below came out undefined and SSLCommerz received a blank customer.
     const booking = await Booking.findById(payment.booking)
+        .populate("user", "name email phone address")
+
+    if (!booking) {
+        throw new AppError(httpStatus.NOT_FOUND, "Booking Not Found")
+    }
 
     const userAddress = (booking?.user as any).address
     const userEmail = (booking?.user as any).email

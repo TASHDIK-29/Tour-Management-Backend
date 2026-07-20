@@ -183,7 +183,9 @@ const deleteTour = async (id: string) => {
 
 /*********Tour Types*************/
 const createTourType = async (payload: ITourType) => {
-    const existingTourType = await TourType.findOne({ name: payload.tourName });
+    // Query by `tourName` — the model has no `name` field, so the old check
+    // never matched and duplicates got through to the unique index instead.
+    const existingTourType = await TourType.findOne({ tourName: payload.tourName });
 
     if (existingTourType) {
         throw new Error("Tour type already exists.");

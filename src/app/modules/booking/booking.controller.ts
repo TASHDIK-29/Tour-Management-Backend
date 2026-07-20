@@ -18,18 +18,27 @@ const createBooking = catchAsync(async (req: Request, res: Response) => {
 
 const getUserBookings = catchAsync(
     async (req: Request, res: Response) => {
-        const bookings = await BookingService.getUserBookings();
+        const decodedToken = req.user as JwtPayload
+        const result = await BookingService.getUserBookings(
+            decodedToken.userId,
+            req.query as Record<string, string>
+        );
         sendResponse(res, {
             statusCode: 200,
             success: true,
             message: "Bookings retrieved successfully",
-            data: bookings,
+            data: result.data,
+            meta: result.meta,
         });
     }
 );
 const getSingleBooking = catchAsync(
     async (req: Request, res: Response) => {
-        const booking = await BookingService.getBookingById();
+        const decodedToken = req.user as JwtPayload
+        const booking = await BookingService.getBookingById(
+            req.params.bookingId as string,
+            decodedToken
+        );
         sendResponse(res, {
             statusCode: 200,
             success: true,
@@ -41,22 +50,26 @@ const getSingleBooking = catchAsync(
 
 const getAllBookings = catchAsync(
     async (req: Request, res: Response) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const bookings = await BookingService.getAllBookings();
+        const result = await BookingService.getAllBookings(
+            req.query as Record<string, string>
+        );
         sendResponse(res, {
             statusCode: 200,
             success: true,
             message: "Bookings retrieved successfully",
-            data: {},
-            // meta: {},
+            data: result.data,
+            meta: result.meta,
         });
     }
 );
 
 const updateBookingStatus = catchAsync(
     async (req: Request, res: Response) => {
-
+        const decodedToken = req.user as JwtPayload
         const updated = await BookingService.updateBookingStatus(
+            req.params.bookingId as string,
+            req.body.status,
+            decodedToken
         );
         sendResponse(res, {
             statusCode: 200,

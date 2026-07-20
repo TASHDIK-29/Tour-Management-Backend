@@ -96,8 +96,11 @@ const getSingleTourType = catchAsync(async (req: Request, res: Response) => {
 
 
 const createTourType = catchAsync(async (req: Request, res: Response) => {
+    // The request field is `name` (per createTourTypeZodSchema) but the model
+    // field is `tourName`, so map it here. The service expects an ITourType
+    // object — passing the bare string made payload.tourName undefined.
     const { name } = req.body;
-    const result = await TourService.createTourType(name);
+    const result = await TourService.createTourType({ tourName: name });
     sendResponse(res, {
         statusCode: 201,
         success: true,
@@ -108,8 +111,10 @@ const createTourType = catchAsync(async (req: Request, res: Response) => {
 
 const updateTourType = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
+    // Same `name` -> `tourName` mapping as create; findByIdAndUpdate needs an
+    // update document, not a string.
     const { name } = req.body;
-    const result = await TourService.updateTourType(id, name);
+    const result = await TourService.updateTourType(id, { tourName: name });
     sendResponse(res, {
         statusCode: 200,
         success: true,
