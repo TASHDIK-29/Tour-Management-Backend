@@ -81,10 +81,58 @@ const updateBookingStatus = catchAsync(
 );
 
 
+const getGuideAssignments = catchAsync(
+    async (req: Request, res: Response) => {
+        const decodedToken = req.user as JwtPayload
+        const result = await BookingService.getGuideAssignments(
+            decodedToken.userId,
+            req.query as Record<string, string>
+        );
+        sendResponse(res, {
+            statusCode: 200,
+            success: true,
+            message: "Guide assignments retrieved successfully",
+            data: result.data,
+            meta: result.meta,
+        });
+    }
+);
+
+const assignGuideToBooking = catchAsync(
+    async (req: Request, res: Response) => {
+        const updated = await BookingService.assignGuideToBooking(
+            req.params.bookingId as string,
+            req.body.guideId
+        );
+        sendResponse(res, {
+            statusCode: 200,
+            success: true,
+            message: "Guide assigned to booking successfully",
+            data: updated,
+        });
+    }
+);
+
+const confirmGuiding = catchAsync(async (req: Request, res: Response) => {
+    const updated = await BookingService.confirmGuiding(
+        req.params.bookingId as string
+    );
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Guiding confirmed successfully",
+        data: updated,
+    });
+});
+
+
 export const BookingController = {
     createBooking,
     getAllBookings,
     getSingleBooking,
     getUserBookings,
     updateBookingStatus,
+    getGuideAssignments,
+    assignGuideToBooking,
+    confirmGuiding,
 }

@@ -48,7 +48,11 @@ export const checkAuth = (...authRoles: string[]) => async (req: Request, res: R
         next()
 
     } catch (error) {
-        console.log("jwt error", error);
+        // No console.log here: a missing/expired token throwing 403/401 is an
+        // expected, self-healing case — the frontend's baseQuery refreshes and
+        // retries. globalErrorHandler already logs errors in development, so
+        // logging again here just floods the console with benign "No Token
+        // Received" traces during normal auth/refresh cycles.
         next(error)
     }
 }

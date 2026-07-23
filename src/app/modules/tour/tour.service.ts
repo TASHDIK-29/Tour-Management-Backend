@@ -99,8 +99,25 @@ const createTour = async (payload: ITour) => {
 
 const getAllTours = async (query: Record<string, string>) => {
 
+    // Date-range filter on the tour's start date: returns tours whose start date
+    // falls within [dateFrom, dateTo]. Handled here (not in QueryBuilder.filter,
+    // which only does equality) as a $gte/$lte on the base query. dateTo is
+    // pushed to end-of-day so a tour starting that day is included.
+    const { dateFrom, dateTo, ...rest } = query;
 
-    const queryBuilder = new QueryBuilder(Tour.find(), query)
+    const baseFilter: Record<string, unknown> = {};
+    if (dateFrom || dateTo) {
+        const startDate: Record<string, Date> = {};
+        if (dateFrom) startDate.$gte = new Date(dateFrom);
+        if (dateTo) {
+            const end = new Date(dateTo);
+            end.setHours(23, 59, 59, 999);
+            startDate.$lte = end;
+        }
+        baseFilter.startDate = startDate;
+    }
+
+    const queryBuilder = new QueryBuilder(Tour.find(baseFilter), rest)
 
     const tours = await queryBuilder
         .search(tourSearchableFields)

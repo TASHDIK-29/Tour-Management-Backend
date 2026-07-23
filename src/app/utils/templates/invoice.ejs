@@ -1,4 +1,92 @@
-<h1>Invoice for Booking </h1>
-<p>Payment ID: <%= transactionId %></p>
-<p>Amount Paid: <%= totalAmount %></p>
-<p>Thank you for your booking!</p>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your booking is confirmed</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f4f4f7;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border:1px solid #eaeaea;border-radius:14px;overflow:hidden;">
+            <!-- Header -->
+            <tr>
+              <td style="background:#111827;padding:22px 32px;">
+                <span style="font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.3px;">Tour<span style="color:#fb7185;">Link</span></span>
+              </td>
+            </tr>
+            <!-- Confirmation banner -->
+            <tr>
+              <td style="padding:32px 32px 8px;">
+                <div style="display:inline-block;background:#ecfdf5;color:#059669;font-size:12px;font-weight:700;padding:6px 14px;border-radius:999px;letter-spacing:0.3px;">PAYMENT CONFIRMED</div>
+                <h1 style="margin:16px 0 6px;font-size:22px;line-height:1.3;color:#111827;">Your booking is confirmed</h1>
+                <p style="margin:0;color:#4b5563;font-size:14px;line-height:1.7;">
+                  Hi <strong style="color:#111827;"><%= userName %></strong>, thanks for booking with TourLink. Your payment was received and your trip is all set. A PDF invoice is attached to this email.
+                </p>
+              </td>
+            </tr>
+            <!-- Summary card -->
+            <tr>
+              <td style="padding:20px 32px 8px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eaeaea;border-radius:12px;overflow:hidden;">
+                  <tr>
+                    <td style="padding:16px 20px;border-bottom:1px solid #f0f0f0;">
+                      <p style="margin:0 0 2px;color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Tour</p>
+                      <p style="margin:0;color:#111827;font-size:15px;font-weight:600;"><%= tourTitle %></p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px 20px;border-bottom:1px solid #f0f0f0;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="color:#6b7280;font-size:13px;">Guests</td>
+                          <td align="right" style="color:#111827;font-size:13px;font-weight:600;"><%= guestCount %></td>
+                        </tr>
+                        <tr>
+                          <td style="color:#6b7280;font-size:13px;padding-top:8px;">Booking date</td>
+                          <td align="right" style="color:#111827;font-size:13px;font-weight:600;padding-top:8px;"><%= new Date(bookingDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) %></td>
+                        </tr>
+                        <tr>
+                          <td style="color:#6b7280;font-size:13px;padding-top:8px;">Transaction ID</td>
+                          <td align="right" style="color:#111827;font-size:13px;font-weight:600;padding-top:8px;word-break:break-all;"><%= transactionId %></td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:16px 20px;background:#fafafa;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="color:#111827;font-size:15px;font-weight:700;">Total paid</td>
+                          <td align="right" style="color:#e11d48;font-size:18px;font-weight:700;">&#2547; <%= Number(totalAmount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <!-- Footer note -->
+            <tr>
+              <td style="padding:20px 32px 4px;">
+                <p style="margin:0;color:#6b7280;font-size:13px;line-height:1.7;">
+                  You can view this booking and download your invoice anytime from your dashboard.
+                </p>
+              </td>
+            </tr>
+            <!-- Footer -->
+            <tr>
+              <td style="background:#f9fafb;padding:20px 32px;border-top:1px solid #eaeaea;margin-top:16px;">
+                <p style="margin:0;color:#9ca3af;font-size:12px;line-height:1.6;">
+                  &copy; <%= new Date().getFullYear() %> TourLink &middot; Tour Management System<br />
+                  This is an automated message, please do not reply.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
